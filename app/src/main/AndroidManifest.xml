@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.tompreug_migarpl.bubble" >
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme"
+        android:screenOrientation="portrait">
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".Juego"
+            android:label="Juego"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
+
+        <activity
+            android:name=".AcercaDe"
+            android:theme="@android:style/Theme.Dialog"
+            android:screenOrientation="portrait"
+            android:label="Acerca de ..."/>
+
+        <activity
+            android:name=".Ayuda"
+            android:theme="@android:style/Theme.Dialog"
+            android:screenOrientation="portrait"
+            android:label="Ayuda"/>
+
+        <activity
+            android:name=".Preferencias"
+            android:label="Configurar"/>
+
+    </application>
+
+
+
+</manifest>

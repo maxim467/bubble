@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Bubble</string>
+    <string name="jugar">Jugar</string>
+    <string name="configurar">Configurar</string>
+    <string name="acerca_de">Acerca de</string>
+    <string name="salir">Ayuda</string>
+    <string name="action_settings">Settings</string>
+
+</resources>
