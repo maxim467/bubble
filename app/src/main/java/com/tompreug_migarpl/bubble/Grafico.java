@@ -65,16 +65,25 @@ public class Grafico {
     }
 
 
-    public void incrementaPos(double factor){
-        posX+=incX * factor;
+    public void incrementaPos(double factor){ //factor es el retardo
+        posX+=incX * factor; //actualizamos la posicion de X
         // Si salimos de la pantalla, corregimos posición
-        if(posX<-ancho/2) {posX=view.getWidth()-ancho/2;}
-        if(posX>view.getWidth()-ancho/2) {posX=-ancho/2;}
-        posY+=incY * factor;
-        if(posY<-alto/2) {posY=view.getHeight()-alto/2;}
-        if(posY>view.getHeight()-alto/2) {posY=-alto/2;}
-       // angulo += rotacion * factor; //Actualizamos ángulo
+        if(posX<0) {
+            incX = -incX;
+        }
+        if(posX>view.getWidth()-ancho) {
+            incX = -incX;
+        }
+        posY+=incY * factor; //actualizamos la posicion de Y
+        if(posY<-alto/2) {
+            posY=view.getHeight()-alto/2;
+        }
+        if(posY>view.getHeight()-alto/2) {
+            posY=-alto/2;
+        }
+        //angulo=angulo+factor;
     }
+
 
 
     public double distancia(Grafico g) {
