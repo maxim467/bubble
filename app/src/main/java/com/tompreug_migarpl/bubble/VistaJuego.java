@@ -212,13 +212,36 @@ public class VistaJuego extends View{
 
     private boolean disparo=false;
     private double angulo_touch;
+    private double new_angulo_touch;
+
+
+
 
     @Override
     public boolean onTouchEvent (MotionEvent event) {
         super.onTouchEvent(event);
         float x = event.getX();
         float y = event.getY();
-        angulo_touch = Math.atan((x-bubble_quiet.getPosX())/(bubble_quiet.getPosY()-y));
+
+
+
+        // angulo_touch = Math.atan((x-bubble_quiet.getPosX())/(bubble_quiet.getPosY()-y));
+
+
+        angulo_touch = (Math.atan((alto_pant-y)/(bubble_quiet.getPosX()-x+(bubble_quiet.getAncho())/2)));
+
+        if(angulo_touch <0.0){     // OJO Aquí entraremos cuando el angulo_touch sea negativo¡¡¡
+
+                                               // angulo_touch está en radianes por que asi sale de 'atan'
+
+            new_angulo_touch=angulo_touch;
+
+
+            angulo_touch=Math.PI+new_angulo_touch;   //angulo_touch = pi (radianes) + ángulo obtenido  antes
+                                                     // con esto resolvemos el problema de que la bola salga hacia abajo al ser disparada.
+        }
+
+
         if (bubbleActivo == false) { //haz caso si la bubble esta parada
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
@@ -267,8 +290,19 @@ public class VistaJuego extends View{
     private void ActivaBubble() { //3. conseguir obtener la direccion de donde se toca
         bubble_move.setPosX(bubble_quiet.getPosX()); //para que salga donde esta la quieta
         bubble_move.setPosY(bubble_quiet.getPosY());
-        bubble_move.setIncX(Math.cos(angulo_touch) * PASO_VELOCIDAD_BUBBLE); // incremento de X
-        bubble_move.setIncY(Math.sin(angulo_touch) * PASO_VELOCIDAD_BUBBLE); //incremento de Y
+
+
+
+        bubble_move.setIncX(Math.cos(angulo_touch+Math.PI)  // incremento de X
+                * PASO_VELOCIDAD_BUBBLE);
+
+        bubble_move.setIncY(Math.sin(-angulo_touch)         //incremento de Y
+                * PASO_VELOCIDAD_BUBBLE);
+
+
+
+
+
         bubbleActivo = true;
     }
 
