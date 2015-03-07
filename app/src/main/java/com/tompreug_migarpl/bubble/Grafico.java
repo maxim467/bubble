@@ -75,12 +75,10 @@ public class Grafico {
             incX = -incX;
         }
         posY+=incY * factor; //actualizamos la posicion de Y
-        if(posY<-alto/2) {
-            posY=view.getHeight()-alto/2;
-        }
-        if(posY>view.getHeight()-alto/2) {
-            posY=-alto/2;
-        }
+        //if(posY<0) {
+         //  incY=-incY;
+        //}
+
         //angulo=angulo+factor;
     }
 

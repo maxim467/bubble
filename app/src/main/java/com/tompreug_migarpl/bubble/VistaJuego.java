@@ -15,22 +15,21 @@ import java.util.Random;
 
 import static com.tompreug_migarpl.bubble.Grafico.randInt;
 
-public class VistaJuego extends View{
+public class VistaJuego extends View {
 
     ////Bolas estaticas\\\\
     private Vector<Grafico> Bubbles; // Vector de las bolas
+    public Vector<Grafico> New_Bubbles;
     private int numBubbles; // Número inicial de bolas
     private int modificador;
 
     // //// Bola fija //////
     private Grafico bubble_quiet;// Gráfico de la bola
-    private int giroBubble; // Incremento de dirección
 
     // //// Bola en movimiento //////
     private Grafico bubble_move;
     private static int PASO_VELOCIDAD_BUBBLE = 12;
     private boolean bubbleActivo = false;
-    private int tiempoBubble;
 
     int min = 1;
     int max = 4;
@@ -39,7 +38,7 @@ public class VistaJuego extends View{
     // Thread encargado de procesar el juego
     private ThreadJuego thread = new ThreadJuego();
     // Cada cuanto queremos procesar cambios (ms)
-    private static int PERIODO_PROCESO = 50;
+    private static int PERIODO_PROCESO = 25;
     // Cuando se realizó el último proceso
     private long ultimoProceso = 0;
 
@@ -81,7 +80,7 @@ public class VistaJuego extends View{
         SharedPreferences pref = context.getSharedPreferences("com.tompreug_migarpl.bubble_preferences", Context.MODE_PRIVATE);
         if (pref.getString("dificultad", "0").equals("0")) { //para dificultad facil
             numBubbles = 3;
-            modificador = 2*bubble_amarilla_move.getAncho();
+            modificador = 2 * bubble_amarilla_move.getAncho();
         }
         if (pref.getString("dificultad", "1").equals("1")) { //para dificultad medio
             numBubbles = 5;
@@ -93,6 +92,8 @@ public class VistaJuego extends View{
         }
 
         Bubbles = new Vector<Grafico>();
+        New_Bubbles = new Vector<Grafico>();
+
         for (int i = 0; i < numBubbles; i++) { //no cambiar a "Bubbles.size()" lo he probado y no funciona
             // Funcion Random para crear bolas (rand Int)
             up = randInt(min, max); //para las bolas de arriba
@@ -140,37 +141,50 @@ public class VistaJuego extends View{
         }
     }
 
-    private int ancho_pant, alto_pant; //esto es para poder obtener las dimensiones de la pantalla para cualquier metodo
+    private int alto_pant; //esto es para poder obtener las dimensiones de la pantalla para cualquier metodo
 
-    @Override protected void onSizeChanged ( int ancho, int alto, int ancho_anter, int alto_anter){ //metodo para posicionar los objetos
+    @Override
+    protected void onSizeChanged(int ancho, int alto, int ancho_anter, int alto_anter) { //metodo para posicionar los objetos
         super.onSizeChanged(ancho, alto, ancho_anter, alto_anter);
-        ancho_pant = ancho;
-        alto_pant = alto;
+
+        alto_pant = alto; // se lo asigno a mi variable global
 
         // Una vez que conocemos nuestro ancho y alto.
         for (int i = 0; i < numBubbles; i++) {
             Bubbles.elementAt(i).setPosX((ancho - ((i + 1) * Bubbles.elementAt(i).getAncho()) - modificador)); // para colocar las bolas de arriba
             Bubbles.elementAt(i).setPosY(0);
         }
-        bubble_quiet.setPosX(ancho/2-(bubble_quiet.getAncho())/2); //para colocar la bola de abajo, en el inicio
-        bubble_quiet.setPosY(alto-bubble_quiet.getAlto());
+        bubble_quiet.setPosX(ancho / 2 - (bubble_quiet.getAncho()) / 2); //para colocar la bola de abajo, en el inicio
+        bubble_quiet.setPosY(alto - bubble_quiet.getAlto());
 
         ultimoProceso = System.currentTimeMillis();
         thread.start();
     }
 
-    @Override protected synchronized void onDraw (Canvas canvas) {
+    @Override
+    protected synchronized void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
         for (int i = 0; i < Bubbles.size(); i++) {//esto es para dibujar las bolas de arriba
             Bubbles.elementAt(i).dibujaGrafico(canvas);
+
         }
-        if (bubbleActivo) { //y para dibujar la bola en movimiento
+        if (New_Bubbles.isEmpty() == false) {
+            for (int j = 0; j< New_Bubbles.size(); j++) {
+                New_Bubbles.elementAt(j).dibujaGrafico(canvas);
+            }
+        }
+        if (bubbleActivo) {
             bubble_move.dibujaGrafico(canvas);
+
+
+            //y para dibujar la bola en movimiento
+
         }
-        else
+        else {
             bubble_quiet.dibujaGrafico(canvas); //esto es para dibujar la bola quieta
 
+        }
     }
 
     protected synchronized void actualizaFisica() {
@@ -182,22 +196,27 @@ public class VistaJuego extends View{
         // Para una ejecución en tiempo real calculamos retardo
         double retardo = (ahora - ultimoProceso) / PERIODO_PROCESO;
         ultimoProceso = ahora; // Para la próxima vez
-        // Actualizamos posiciones X e Y
-        bubble_move.incrementaPos(retardo);
+
         // Actualizamos posición de la bola
         if (bubbleActivo) {
-            bubble_move.incrementaPos(retardo); //2. Conseguir que se quede la bola en movimiento cuando supere el alto de la pantalla
-            if (alto_pant < 0) {//if (tiempoBubble < 0) { quiero poner si la posicion de la Y de la bubble_move es menor que el alto de la pantalla desaparezca
-                bubbleActivo = false; //Bubbles.elementAt(i).setPosY(0) posicion de las bolas de arriba
-            }
-            else {
+            bubble_move.incrementaPos(retardo);
+            if (bubble_move.getPosY() < (bubble_move.getAncho()/8)) { //Conseguir que se quede la bola en movimiento cuando supere el alto de la pantalla
+               bubble_move.setPosY(0);
+               bubble_move.setPosX(bubble_move.getPosX());
+                //bubble_move.setPosY(bubble_move.getPosY());
+                New_Bubbles.add(bubble_move); // aqui tengo que hacer que se añada al vector de bolas
+
+
+                bubbleActivo = false; //si supera el alto de la pantalla desaparece
+           }
+
                 for (int i = 0; i < Bubbles.size(); i++) {
                     if (bubble_move.verificaColision(Bubbles.elementAt(i))) {
                         destruyeBubble(i);
                         break;
                     }
                 }
-            }
+
         }
     }
 
@@ -210,48 +229,36 @@ public class VistaJuego extends View{
         }
     }
 
-    private boolean disparo=false;
+    private boolean disparo = false;
     private double angulo_touch;
     private double new_angulo_touch;
 
-
-
-
     @Override
-    public boolean onTouchEvent (MotionEvent event) {
+    public boolean onTouchEvent(MotionEvent event) {
         super.onTouchEvent(event);
         float x = event.getX();
         float y = event.getY();
 
-
-
-        // angulo_touch = Math.atan((x-bubble_quiet.getPosX())/(bubble_quiet.getPosY()-y));
-
-
-        angulo_touch = (Math.atan((alto_pant-y)/(bubble_quiet.getPosX()-x+(bubble_quiet.getAncho())/2)));
-
-        if(angulo_touch <0.0){     // OJO Aquí entraremos cuando el angulo_touch sea negativo¡¡¡
-
-                                               // angulo_touch está en radianes por que asi sale de 'atan'
-
-            new_angulo_touch=angulo_touch;
-
-
-            angulo_touch=Math.PI+new_angulo_touch;   //angulo_touch = pi (radianes) + ángulo obtenido  antes
-                                                     // con esto resolvemos el problema de que la bola salga hacia abajo al ser disparada.
+        angulo_touch = (Math.atan((alto_pant - y) / (bubble_quiet.getPosX() - x + (bubble_quiet.getAncho()) / 2)));
+        if (angulo_touch < 0.0) {     // OJO Aquí entraremos cuando el angulo_touch sea negativo¡¡¡
+            // angulo_touch está en radianes por que asi sale de 'atan'
+            new_angulo_touch = angulo_touch;
+            angulo_touch = Math.PI + new_angulo_touch;   //angulo_touch = pi (radianes) + ángulo obtenido  antes
+            // con esto resolvemos el problema de que la bola salga hacia abajo al ser disparada.
         }
 
-
-        if (bubbleActivo == false) { //haz caso si la bubble esta parada
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_DOWN:
-                    disparo = true;
-                    break;
-                case MotionEvent.ACTION_UP:
-                    if (disparo) {
-                        ActivaBubble();
-                    }
-                    break;
+        if (angulo_touch>(45*Math.PI/180) && angulo_touch<(135*Math.PI/180)){
+            if (bubbleActivo == false) { //dispara si la bubble esta parada
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        disparo = true;
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        if (disparo) {
+                            ActivaBubble();
+                        }
+                        break;
+                }
             }
         }
         return true;
@@ -287,26 +294,12 @@ public class VistaJuego extends View{
             ((Juego)getContext()).finish();
     }
 
-    private void ActivaBubble() { //3. conseguir obtener la direccion de donde se toca
+    private void ActivaBubble() {
         bubble_move.setPosX(bubble_quiet.getPosX()); //para que salga donde esta la quieta
         bubble_move.setPosY(bubble_quiet.getPosY());
-
-
-
-        bubble_move.setIncX(Math.cos(angulo_touch+Math.PI)  // incremento de X
-                * PASO_VELOCIDAD_BUBBLE);
-
-        bubble_move.setIncY(Math.sin(-angulo_touch)         //incremento de Y
-                * PASO_VELOCIDAD_BUBBLE);
-
-
-
-
-
+        bubble_move.setIncX(Math.cos(angulo_touch+Math.PI) * PASO_VELOCIDAD_BUBBLE); // incremento de X
+        bubble_move.setIncY(Math.sin(-angulo_touch) * PASO_VELOCIDAD_BUBBLE); //incremento de Y
         bubbleActivo = true;
     }
 
 }
-
-
-
