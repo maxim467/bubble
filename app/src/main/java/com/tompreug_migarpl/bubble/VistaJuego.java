@@ -1,14 +1,25 @@
 package com.tompreug_migarpl.bubble;
 
+import android.app.Activity;
 import android.content.Context;
 
 import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.View;
 import android.graphics.Canvas;
+import android.view.Display;
+import android.view.Window;
+import android.view.WindowManager;
+import android.content.Context;
+import android.util.DisplayMetrics;
 
 import android.view.MotionEvent;
+import android.view.WindowManager;
 
 import java.util.Vector;
 import java.util.Random;
@@ -45,10 +56,18 @@ public class VistaJuego extends View {
     private Grafico bubble_roja_quiet, bubble_verde_quiet, bubble_azul_quiet, bubble_amarilla_quiet,
             bubble_roja_move, bubble_verde_move, bubble_azul_move, bubble_amarilla_move;
 
+
+
+
+
+
+
+
+
     public VistaJuego(Context context, AttributeSet attrs) {
         super(context, attrs);
-        int up = 0;
-        int down = 0;
+        int up = 1;
+        int down = 1;
         Drawable drawableBubble_roja, drawableBubble_verde, drawableBubble_azul, drawableBubble_amarilla,
                 drawableBubble_quiet_roja, drawableBubble_quiet_verde, drawableBubble_quiet_azul, drawableBubble_quiet_amarilla,
                 drawableBubble_move_roja, drawableBubble_move_verde, drawableBubble_move_azul, drawableBubble_move_amarilla;
@@ -77,18 +96,27 @@ public class VistaJuego extends View {
         bubble_amarilla_quiet = new Grafico(this, drawableBubble_quiet_amarilla);
         bubble_amarilla_move = new Grafico(this, drawableBubble_move_amarilla);
 
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        int width = display.getWidth();
+        int height = display.getHeight();
+
         SharedPreferences pref = context.getSharedPreferences("com.tompreug_migarpl.bubble_preferences", Context.MODE_PRIVATE);
         if (pref.getString("dificultad", "0").equals("0")) { //para dificultad facil
             numBubbles = 3;
-            modificador = 2 * bubble_amarilla_move.getAncho();
+            //modificador = 2 * bubble_amarilla_move.getAncho();
+            modificador = ((width-3 * bubble_amarilla_move.getAncho())/2);
         }
         if (pref.getString("dificultad", "1").equals("1")) { //para dificultad medio
             numBubbles = 5;
-            modificador = bubble_amarilla_move.getAncho();
+            //modificador = bubble_amarilla_move.getAncho();
+            modificador = ((width-5 * bubble_amarilla_move.getAncho())/2);
+
         }
+
         if (pref.getString("dificultad", "2").equals("2")) { //para dificultad dificil
             numBubbles = 7;
-            modificador = 0;
+            modificador = ((width-7 * bubble_amarilla_move.getAncho())/2);
         }
 
         Bubbles = new Vector<Grafico>();
@@ -100,18 +128,22 @@ public class VistaJuego extends View {
             switch (up) {
                 case 1:
                     Grafico bubble_roja = new Grafico(this, drawableBubble_roja);
+                    bubble_roja.setcolor(1);
                     Bubbles.add(bubble_roja);
                     break;
                 case 2:
                     Grafico bubble_azul = new Grafico(this, drawableBubble_azul);
+                    bubble_azul.setcolor(2);
                     Bubbles.add(bubble_azul);
                     break;
                 case 3:
                     Grafico bubble_verde = new Grafico(this, drawableBubble_verde);
+                    bubble_verde.setcolor(3);
                     Bubbles.add(bubble_verde);
                     break;
                 case 4:
                     Grafico bubble_amarilla = new Grafico(this, drawableBubble_amarilla);
+                    bubble_amarilla.setcolor(4);
                     Bubbles.add(bubble_amarilla);
                     break;
                 default:
@@ -121,18 +153,26 @@ public class VistaJuego extends View {
         down = randInt(min, max); //para que salga aleatoria la bola de abajo en el inicio
         switch (down) {
             case 1:
+                bubble_roja_quiet.setcolor(1);
+                bubble_roja_move.setcolor(1);
                 bubble_quiet = bubble_roja_quiet;
                 bubble_move = bubble_roja_move;
                 break;
             case 2:
+                bubble_azul_quiet.setcolor(2);
+                bubble_azul_move.setcolor(2);
                 bubble_quiet = bubble_azul_quiet;
                 bubble_move = bubble_azul_move;
                 break;
             case 3:
+                bubble_verde_quiet.setcolor(3);
+                bubble_verde_move.setcolor(3);
                 bubble_quiet = bubble_verde_quiet;
                 bubble_move = bubble_verde_move;
                 break;
             case 4:
+                bubble_amarilla_quiet.setcolor(4);
+                bubble_amarilla_move.setcolor(4);
                 bubble_quiet = bubble_amarilla_quiet;
                 bubble_move = bubble_amarilla_move;
                 break;
@@ -149,8 +189,11 @@ public class VistaJuego extends View {
 
         alto_pant = alto; // se lo asigno a mi variable global
 
+
         // Una vez que conocemos nuestro ancho y alto.
         for (int i = 0; i < numBubbles; i++) {
+
+
             Bubbles.elementAt(i).setPosX((ancho - ((i + 1) * Bubbles.elementAt(i).getAncho()) - modificador)); // para colocar las bolas de arriba
             Bubbles.elementAt(i).setPosY(0);
         }
@@ -167,22 +210,24 @@ public class VistaJuego extends View {
 
         for (int i = 0; i < Bubbles.size(); i++) {//esto es para dibujar las bolas de arriba
             Bubbles.elementAt(i).dibujaGrafico(canvas);
+            /*if (New_Bubbles.isEmpty() == false) {
+                for (int j = 0; j < New_Bubbles.size(); j++) {
+                    New_Bubbles.elementAt(j).dibujaGrafico(canvas);
+                }
 
-        }
-        if (New_Bubbles.isEmpty() == false) {
-            for (int j = 0; j< New_Bubbles.size(); j++) {
-                New_Bubbles.elementAt(j).dibujaGrafico(canvas);
+
             }
+            */
         }
+
         if (bubbleActivo) {
             bubble_move.dibujaGrafico(canvas);
 
 
             //y para dibujar la bola en movimiento
 
-        }
-        else {
-            bubble_quiet.dibujaGrafico(canvas); //esto es para dibujar la bola quieta
+        } else {
+            bubble_quiet.dibujaGrafico(canvas);
 
         }
     }
@@ -200,11 +245,12 @@ public class VistaJuego extends View {
         // Actualizamos posición de la bola
         if (bubbleActivo) {
             bubble_move.incrementaPos(retardo);
-            if (bubble_move.getPosY() < (bubble_move.getAncho()/8)) { //Conseguir que se quede la bola en movimiento cuando supere el alto de la pantalla
-               bubble_move.setPosY(0);
-               bubble_move.setPosX(bubble_move.getPosX());
+            if (bubble_move.getPosY() < (1)) { //Conseguir que se quede la bola en movimiento cuando supere el alto de la pantalla
+               //bubble_move.setPosY(0);
+               //bubble_move.setPosX(bubble_move.getPosX());
                 //bubble_move.setPosY(bubble_move.getPosY());
-                New_Bubbles.add(bubble_move); // aqui tengo que hacer que se añada al vector de bolas
+                //New_Bubbles.add(bubble_move); // aqui tengo que hacer que se añada al vector de bolas
+
 
 
                 bubbleActivo = false; //si supera el alto de la pantalla desaparece
@@ -216,6 +262,12 @@ public class VistaJuego extends View {
                         break;
                     }
                 }
+                    //for (int q = 0; q < New_Bubbles.size(); q++) {
+                    //if (bubble_move.verificaColision(New_Bubbles.elementAt(q))) {
+                      //  destruyeNew_Bubbles(q);
+                       // break;
+                    //}
+               // }
 
         }
     }
@@ -240,11 +292,11 @@ public class VistaJuego extends View {
         float y = event.getY();
 
         angulo_touch = (Math.atan((alto_pant - y) / (bubble_quiet.getPosX() - x + (bubble_quiet.getAncho()) / 2)));
-        if (angulo_touch < 0.0) {     // OJO Aquí entraremos cuando el angulo_touch sea negativo¡¡¡
-            // angulo_touch está en radianes por que asi sale de 'atan'
+        if (angulo_touch < 0.0) {                   // OJO Aquí entraremos cuando el angulo_touch sea negativo¡¡¡
+                                                     // angulo_touch está en radianes por que asi sale de 'atan'
             new_angulo_touch = angulo_touch;
             angulo_touch = Math.PI + new_angulo_touch;   //angulo_touch = pi (radianes) + ángulo obtenido  antes
-            // con esto resolvemos el problema de que la bola salga hacia abajo al ser disparada.
+                                                             // con esto resolvemos el problema de que la bola salga hacia abajo al ser disparada.
         }
 
         if (angulo_touch>(45*Math.PI/180) && angulo_touch<(135*Math.PI/180)){
@@ -265,7 +317,51 @@ public class VistaJuego extends View {
     }
 
     private void destruyeBubble(int i) {
-        Bubbles.removeElementAt(i);
+        if(Bubbles.elementAt(i).getColor()== bubble_move.getColor()) {
+            Bubbles.removeElementAt(i);
+
+            bubbleActivo = false;
+        }
+        int down = randInt(min, max); //para que salga aleatoria la bola de abajo, en los siguientes casos
+        switch (down) {
+            case 1:
+                bubble_roja_quiet.setcolor(1);
+                bubble_roja_move.setcolor(1);
+                bubble_quiet = bubble_roja_quiet;
+                bubble_move = bubble_roja_move;
+                break;
+            case 2:
+                bubble_azul_quiet.setcolor(2);
+                bubble_azul_move.setcolor(2);
+                bubble_quiet = bubble_azul_quiet;
+                bubble_move = bubble_azul_move;
+                break;
+            case 3:
+                bubble_verde_quiet.setcolor(3);
+                bubble_verde_move.setcolor(3);
+                bubble_quiet = bubble_verde_quiet;
+                bubble_move = bubble_verde_move;
+                break;
+            case 4:
+                bubble_amarilla_quiet.setcolor(4);
+                bubble_amarilla_move.setcolor(4);
+                bubble_quiet = bubble_amarilla_quiet;
+                bubble_move = bubble_amarilla_move;
+                break;
+            default:
+                break;
+        }
+        bubble_quiet.setPosX(getWidth()/2-(bubble_quiet.getAncho())/2); //para colocar la bola de abajo, en los siguientes casos
+        bubble_quiet.setPosY(getHeight()-bubble_quiet.getAlto());
+        if (Bubbles.isEmpty()) //si no hay bubbles termina el juego
+            ((Juego)getContext()).finish();
+    }
+
+
+    private void destruyeNew_Bubbles(int i){
+
+
+        New_Bubbles.removeElementAt(i);
         bubbleActivo = false;
         int down = randInt(min, max); //para que salga aleatoria la bola de abajo, en los siguientes casos
         switch (down) {

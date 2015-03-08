@@ -12,6 +12,7 @@ import java.util.Random;
  * Created by MiguelGarcia on 24/2/15.
  */
 public class Grafico {
+    private int color;
     private Drawable drawable;   //Imagen que dibujaremos
     private double posX, posY;   //Posición
     private double incX, incY;   //Velocidad desplazamiento
@@ -91,6 +92,13 @@ public class Grafico {
         return(distancia(g) < (radioColision+g.radioColision));
     }
 
+    public void setcolor(int color){
+
+     this.color=color;
+    }
+    public  int getColor () {
+        return color;
+    }
     public Drawable getDrawable() {
         return drawable;
     }
